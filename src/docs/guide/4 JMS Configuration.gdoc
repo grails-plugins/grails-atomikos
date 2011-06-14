@@ -1,0 +1,26 @@
+If you have the [JMS plugin|http://grails.org/plugin/jms] installed, an XA Atomikos connection factory will be configured and your JMS template(s) and message listeners (e.g. services using annotations or @static exposes = ['jms']@) will be configured to use XA. You still need to configure the @jmsConnectionFactory@ bean since this is provider-specific (e.g. ActiveMQ), and you need to ensure that you create an XA connection factory, e.g.
+
+{code}
+jmsConnectionFactory(org.apache.activemq.ActiveMQXAConnectionFactory) {
+   brokerURL = 'vm://localhost'
+}
+{code}
+
+h4. JmsTemplate
+
+By default the JMS plugin creates a @JmsTemplate@ as the @standardJmsTemplate@ bean. It (and any other @JmsTemplate@ beans in the @ApplicationContext@) will be updated to use the XA connection factory. If you want to skip this enhancement for a @JmsTemplate@, add a configuration option for the @grails.plugin.atomikos.convert.<beanname>@ attribute for each one in @grails-app/conf/Config.groovy@, e.g.:
+
+{code}
+grails.plugin.atomikos.convert.standardJmsTemplate = false
+{code}
+
+h4. Listeners
+
+Typically when using the JMS plugin, you use services as message listeners. A [DefaultMessageListenerContainer|http://static.springsource.org/spring/docs/2.5.x/api/org/springframework/jms/listener/DefaultMessageListenerContainer.html] bean will  be configured and by default it will be updated to use XA for message handling. This way a JMS message sent in a transaction that gets rolled back will not be delivered.
+
+If you want to skip this enhancement for a listener, add a configuration option for the @grails.plugin.atomikos.convert.<beanname>@ attribute for each one in @grails-app/conf/Config.groovy@. The bean name will typically be the service bean name without the 'Service' suffix, and with the 'JmsListenerContainer' suffix added. So for example if you have a @MyMessageService@ service configured as a listener, its corresponding wrapper bean name will be @myMessageJmsListenerContainer@, so to disable XA configuration for this listener add this line to @Config.groovy@:
+
+{code}
+grails.plugin.atomikos.convert.messageTestJmsListenerContainer = false
+{code}
+

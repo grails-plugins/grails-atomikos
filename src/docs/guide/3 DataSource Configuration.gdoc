@@ -1,0 +1,57 @@
+To configure a DataSource to use XA, add an @xaConfig@ @Map@ in the datasource configuration in @grails-app/conf/DataSource.groovy@.
+
+For example, suppose your primary DataSource uses MySQL and you also have a second one that uses H2. You would add @xaConfig@ sections like these to your datasource definitions:
+
+{code}
+dataSource {
+   dbCreate = 'create-drop'
+   url = 'jdbc:mysql://localhost/database_name'
+   driverClassName = 'com.mysql.jdbc.Driver'
+   username = 'username'
+   password = 'password'
+   xaConfig = [
+      driverClassName: 'com.mysql.jdbc.jdbc2.optional.MysqlXADataSource',
+      driverProperties: [
+         URL: 'jdbc:mysql://localhost/database_name',
+         user: 'username',
+         password: 'password',
+         autoReconnect: true,
+         autoReconnectForConnectionPools: true,
+         autoReconnectForPools: true]
+      minPoolSize: 1,
+      maxPoolSize: 50
+   ]
+}
+
+dataSource_h2 {
+   dbCreate = 'create-drop'
+   url = 'jdbc:h2:mem:devDb'
+   driverClassName = 'org.h2.Driver'
+   username = 'sa'
+   password = ''
+   xaConfig = [
+      driverClassName: 'org.h2.jdbcx.JdbcDataSource',
+      driverProperties: [
+         URL: 'jdbc:h2:mem:devDb',
+         user: 'sa',
+         password: ''],
+      minPoolSize: 1,
+      maxPoolSize: 50
+   ]
+}
+{code}
+
+@driverClassName@ and @driverProperties@ are required; the @driverProperties@ are used to configure the XA pool specified by @driverClassName@ and are driver-specific. All other properties are passed through to the @AtomikosDataSourceBean@.
+
+Unfortunately some of the information is redundant (url, username, password) since there's no standard API for XA datasource configuration options and each driver will have its own attribute names. But using this approach it's possible to use the datasource as a non-XA datasource if you wish.
+
+Your Hibernate @SessionFactory@ bean(s) will automatically be configured to use the Atomikos JTA transaction factory and transaction manager; no other configuration is required.
+
+h4. Disabling XA for individual DataSources
+
+By default all DataSource beans will be updated to be XA datasources. If you want to skip this enhancement for one or more datasources, add a configuration option for the @grails.plugin.atomikos.convert.<beanname>@ attribute for each in @grails-app/conf/Config.groovy@, e.g.:
+
+{code}
+grails.plugin.atomikos.convert.dataSource_h2 = false
+{code}
+

@@ -14,8 +14,9 @@
  */
 package grails.plugin.atomikos
 
-import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.MutablePropertyValues
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
 import org.springframework.beans.factory.config.PropertiesFactoryBean
@@ -34,7 +35,7 @@ import com.atomikos.jdbc.AtomikosDataSourceBean
  */
 class AtomikosBeanPostProcessor implements BeanDefinitionRegistryPostProcessor {
 
-	private Logger log = Logger.getLogger(getClass())
+	private Logger log = LoggerFactory.getLogger(getClass())
 
 	GrailsApplication grailsApplication
 

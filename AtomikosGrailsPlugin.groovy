@@ -1,3 +1,5 @@
+import org.slf4j.LoggerFactory;
+
 /* Copyright 2011 SpringSource.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +18,8 @@
 import grails.plugin.atomikos.AtomikosBeanPostProcessor
 import grails.plugin.atomikos.UserTransactionServiceProperties
 
-import org.apache.log4j.Logger
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.jms.core.JmsTemplate
 import org.springframework.jms.listener.DefaultMessageListenerContainer
 import org.springframework.transaction.jta.JtaTransactionManager
@@ -28,7 +31,7 @@ import com.atomikos.icatch.standalone.UserTransactionServiceFactory
 
 class AtomikosGrailsPlugin {
 
-	private Logger log = Logger.getLogger('grails.plugin.atomikos.AtomikosGrailsPlugin')
+	private Logger log = LoggerFactory.getLogger('grails.plugin.atomikos.AtomikosGrailsPlugin')
 
 	String version = '1.0'
 	String grailsVersion = '1.3 > *'	

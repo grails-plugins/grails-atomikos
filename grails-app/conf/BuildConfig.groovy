@@ -1,7 +1,7 @@
 grails.project.class.dir = 'target/classes'
 grails.project.test.class.dir = 'target/test-classes'
 grails.project.test.reports.dir = 'target/test-reports'
-grails.project.docs.output.dir = 'docs' // for backwards-compatibility, the docs are checked into gh-pages branch
+grails.project.docs.output.dir = 'docs/manual' // for backwards-compatibility, the docs are checked into gh-pages branch
 
 grails.project.dependency.resolution = {
 
@@ -13,6 +13,8 @@ grails.project.dependency.resolution = {
 		grailsPlugins()
 		grailsHome()
 		grailsCentral()
+
+		mavenLocal()
 		mavenCentral()
 	}
 
@@ -24,5 +26,11 @@ grails.project.dependency.resolution = {
 		compile('com.atomikos:transactions-jdbc:3.7.0')       { transitive = false }
 		compile('com.atomikos:transactions-jta:3.7.0')        { transitive = false }
 		compile('com.atomikos:transactions-jms:3.7.0')        { transitive = false }
+	}
+
+	plugins {
+		build(':release:1.0.0.RC3') {
+			export = false
+		}
 	}
 }

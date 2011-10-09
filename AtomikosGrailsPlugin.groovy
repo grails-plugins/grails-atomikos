@@ -1,5 +1,3 @@
-import org.slf4j.LoggerFactory;
-
 /* Copyright 2011 SpringSource.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -91,18 +89,12 @@ class AtomikosGrailsPlugin {
 				bean.initMethod = 'init'
 				uniqueResourceName = 'atomikosJmsConnectionFactory'
 				xaConnectionFactory = ref('jmsConnectionFactory')
-//				minPoolSize = 1
 				maxPoolSize = 10
+//				minPoolSize = 1
 //				borrowConnectionTimeout = 30
 //				maintenanceInterval = 60
 //				maxIdleTime = 60
 //				reapTimeout = 0
-			}
-
-			xaJmsTemplate(JmsTemplate) {
-				connectionFactory = ref('atomikosJmsConnectionFactory')
-				sessionTransacted = true
-//				receiveTimeout = 2000
 			}
 		}
 	}

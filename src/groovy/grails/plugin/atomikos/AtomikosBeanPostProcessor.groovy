@@ -55,6 +55,17 @@ class AtomikosBeanPostProcessor implements BeanDefinitionRegistryPostProcessor {
 				}
 			}
 		}
+
+		if (!grailsApplication.config.grails.plugin.atomikos.containsKey('uts')) {
+			grailsApplication.config.grails.plugin.atomikos.uts = [
+				'com.atomikos.icatch.console_file_name': 'tm.out',
+				'com.atomikos.icatch.log_base_name': 'tmlog',
+				'com.atomikos.icatch.tm_unique_name': 'atomikosTransactionManager',
+				'com.atomikos.icatch.console_log_level': 'INFO',
+				'com.atomikos.icatch.log_base_dir': 'target/atomikos',
+				'com.atomikos.icatch.output_dir': 'target/atomikos',
+				'com.atomikos.icatch.force_shutdown_on_vm_exit': 'true']
+		}
 	}
 
 	protected void convertDataSourceToXa(BeanDefinitionRegistry registry, String beanName) {

@@ -99,7 +99,6 @@ class AtomikosGrailsPlugin {
 //				reapTimeout = 0
 			}
 
-			// TODO not needed if it's ok to alter 'standardJmsTemplate'
 			xaJmsTemplate(JmsTemplate) {
 				connectionFactory = ref('atomikosJmsConnectionFactory')
 				sessionTransacted = true

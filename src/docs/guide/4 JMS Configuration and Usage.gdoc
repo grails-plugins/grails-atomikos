@@ -23,4 +23,3 @@ If you want to skip this enhancement for a listener, add a configuration option 
 {code}
 grails.plugin.atomikos.convert.messageTestJmsListenerContainer = false
 {code}
-

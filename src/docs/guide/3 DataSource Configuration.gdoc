@@ -25,14 +25,14 @@ dataSource {
 
 dataSource_h2 {
    dbCreate = 'create-drop'
-   url = 'jdbc:h2:mem:devDb'
+   url = 'jdbc:h2:db/devDb;MVCC=TRUE'
    driverClassName = 'org.h2.Driver'
    username = 'sa'
    password = ''
    xaConfig = [
       driverClassName: 'org.h2.jdbcx.JdbcDataSource',
       driverProperties: [
-         URL: 'jdbc:h2:mem:devDb',
+         URL: 'jdbc:h2:db/devDb;MVCC=TRUE',
          user: 'sa',
          password: ''],
       minPoolSize: 1,

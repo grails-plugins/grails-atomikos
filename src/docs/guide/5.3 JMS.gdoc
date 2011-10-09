@@ -1,0 +1,172 @@
+Now let's add JMS to the mix. Install the [jms|http://grails.org/plugin/jms] plugin:
+
+{code}
+$ grails install-plugin jms
+{code}
+
+and add ActiveMQ jars as dependencies in @grails-app/conf/BuildConfig.groovy@ since the JMS plugin doesn't provide a JMS implementation:
+
+{code}
+dependencies {
+   runtime 'mysql:mysql-connector-java:5.1.16'
+
+   compile('org.apache.activemq:activemq-core:5.5.0') { transitive = false }
+   runtime('org.apache.activemq:kahadb:5.5.0')        { transitive = false }
+}
+{code}
+
+Register a connection factory and a queue for testing in @grails-app/conf/spring/resources.groovy@:
+
+{code}
+import org.apache.activemq.ActiveMQXAConnectionFactory
+import org.apache.activemq.command.ActiveMQQueue
+
+beans = {
+
+   jmsConnectionFactory(ActiveMQXAConnectionFactory) {
+      brokerURL = 'vm://localhost'
+   }
+
+   jtaQueue(ActiveMQQueue) {
+      physicalName = 'jtaQueue'
+   }
+}
+{code}
+
+h4. MessageTestService
+
+Create a service that will act as our listener:
+
+{code}
+$ grails create-service MessageTest
+{code}
+
+{code}
+package atomikostest
+
+class MessageTestService {
+
+   static exposes = ['jms']
+   static destination = 'jtaQueue'
+
+   // NOT THREAD SAFE - just for testing
+   def mostRecentMessage
+
+   void onMessage(Map message) {
+      mostRecentMessage = message
+      println "\nnew message: $message\n"
+   }
+
+   void onMessage(String message) {
+      mostRecentMessage = message
+      println "\nnew message: $message\n"
+   }
+}
+{code}
+
+Add some additional test methods to @XaTestService@:
+
+{code}
+void failAfterJms() {
+
+   def thing = new MySQLThing(name: 'test JDBC').save(flush: true)
+   assert thing
+
+   def message = [thingId: thing.id, thingName: thing.name]
+   jmsService.send 'jtaQueue', message
+
+   throw new RuntimeException('forcing an auto rollback in failAfterJms')
+}
+
+void failAfterJdbc() {
+   jmsService.send 'jtaQueue', "you won't get this"
+
+   assert new MySQLThing(name: 'test JDBC').save(flush: true)
+
+   throw new RuntimeException('forcing an auto rollback in failAfterJdbc')
+}
+
+void succeedJmsAndJdbc() {
+   def thing = new MySQLThing(name: 'test JDBC').save(flush: true)
+   assert thing
+
+   def message = [thingId: thing.id, thingName: thing.name]
+   jmsService.send 'jtaQueue', message
+}
+{code}
+
+Note that we only test MySQL here to demonstrate that JDBC and JMS work together, but H2 would work fine also.
+
+h4. Testing in the console
+
+First try @failAfterJms()@:
+
+{code}
+import atomikostest.MySQLThing
+
+int mySQLCount = MySQLThing.count()
+
+def xaTestService = ctx.xaTestService
+def messageTestService = ctx.messageTestService
+messageTestService.mostRecentMessage = null
+
+try {
+   xaTestService.failAfterJms()
+   println "uh oh, no exception?"
+}
+catch (e) {
+   println "caught exception: $e.message"
+}
+
+assert mySQLCount == MySQLThing.count()
+assert messageTestService.mostRecentMessage == null
+{code}
+
+and then the same for @failAfterJdbc()@:
+
+{code}
+import atomikostest.MySQLThing
+
+int mySQLCount = MySQLThing.count()
+
+def xaTestService = ctx.xaTestService
+def messageTestService = ctx.messageTestService
+messageTestService.mostRecentMessage = null
+
+try {
+   xaTestService.failAfterJdbc()
+   println "uh oh, no exception?"
+}
+catch (e) {
+   println "caught exception: $e.message"
+}
+
+assert mySQLCount == MySQLThing.count()
+assert messageTestService.mostRecentMessage == null
+{code}
+
+Finally, execute the success case to see that the domain class instance does get created and the JMS message gets sent:
+
+{code}
+import atomikostest.MySQLThing
+
+int mySQLCount = MySQLThing.count()
+
+def xaTestService = ctx.xaTestService
+def messageTestService = ctx.messageTestService
+messageTestService.mostRecentMessage = null
+
+xaTestService.succeedJmsAndJdbc()
+
+assert mySQLCount + 1 == MySQLThing.count()
+assert messageTestService.mostRecentMessage instanceof Map
+{code}
+
+Note that the last assertion about the @mostRecentMessage@ being a Map can occasionally fail since JMS messages are sent and received asynchronously. You can add a @sleep()@ call to wait a bit and ensure that the message is sent and is correct:
+
+{code}
+...
+assert mySQLCount + 1 == MySQLThing.count()
+sleep 200
+assert messageTestService.mostRecentMessage instanceof Map
+{code}

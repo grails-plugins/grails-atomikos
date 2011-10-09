@@ -1,0 +1,99 @@
+To test two-phase commit with the two databases, create a transactional service:
+
+{code}
+$ grails create-service XaTest
+{code}
+
+{code}
+package atomikostest
+
+class XaTestService {
+
+   void failAfterH2() {
+      assert new MySQLThing(name: 'test MySQL').save(flush: true)
+      assert new H2Thing(name: 'test H2').save(flush: true)
+      throw new RuntimeException('forcing an auto rollback in failAfterH2')
+   }
+
+   void failAfterMySQL() {
+      assert new H2Thing(name: 'test H2').save(flush: true)
+      assert new MySQLThing(name: 'test MySQL').save(flush: true)
+      throw new RuntimeException('forcing an auto rollback in failAfterH2')
+   }
+
+   void succeedBoth() {
+      assert new H2Thing(name: 'test H2').save(flush: true)
+      assert new MySQLThing(name: 'test MySQL').save(flush: true)
+   }
+}
+{code}
+
+To verify that an unchecked runtime exception will automatically roll back even flushed instances, there are two methods that create and flush valid instances and then throw an exception, @failAfterH2()@ and @failAfterMySQL()@. @succeedBoth()@ doesn't throw an exception, so it should successfully create both. You could create a controller to test these, but it's simpler to use the Grails console:
+
+{code}
+$ grails console
+{code}
+
+First try @failAfterH2()@:
+
+{code}
+import atomikostest.H2Thing
+import atomikostest.MySQLThing
+
+int h2ThingCount = H2Thing.count()
+int mySQLCount = MySQLThing.count()
+
+def xaTestService = ctx.xaTestService
+
+try {
+   xaTestService.failAfterH2()
+   println "uh oh, no exception?"
+}
+catch (e) {
+   println "caught exception: $e.message"
+}
+
+assert h2ThingCount == H2Thing.count()
+assert mySQLCount == MySQLThing.count()
+{code}
+
+and then the same for @failAfterMySQL()@:
+
+{code}
+import atomikostest.H2Thing
+import atomikostest.MySQLThing
+
+int h2ThingCount = H2Thing.count()
+int mySQLCount = MySQLThing.count()
+
+def xaTestService = ctx.xaTestService
+
+try {
+   xaTestService.failAfterMySQL()
+   println "uh oh, no exception?"
+}
+catch (e) {
+   println "caught exception: $e.message"
+}
+
+assert h2ThingCount == H2Thing.count()
+assert mySQLCount == MySQLThing.count()
+{code}
+
+Finally, execute the success case to see that the instances do get created:
+
+{code}
+import atomikostest.H2Thing
+import atomikostest.MySQLThing
+
+int h2ThingCount = H2Thing.count()
+int mySQLCount = MySQLThing.count()
+
+def xaTestService = ctx.xaTestService
+
+xaTestService.succeedBoth()
+
+assert h2ThingCount + 1 == H2Thing.count()
+assert mySQLCount + 1 == MySQLThing.count()
+{code}
+

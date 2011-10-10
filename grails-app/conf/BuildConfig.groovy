@@ -26,6 +26,9 @@ grails.project.dependency.resolution = {
 		compile('com.atomikos:transactions-jdbc:3.7.0')       { transitive = false }
 		compile('com.atomikos:transactions-jta:3.7.0')        { transitive = false }
 		compile('com.atomikos:transactions-jms:3.7.0')        { transitive = false }
+
+		compile('org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1')              { transitive = false }
+		compile('org.apache.geronimo.specs:geronimo-j2ee-management_1.1_spec:1.0.1')  { transitive = false }
 	}
 
 	plugins {

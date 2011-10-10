@@ -40,6 +40,10 @@ class AtomikosGrailsPlugin {
 	String documentation = 'http://grails.org/plugin/atomikos'
 
 	def loadAfter = ['dataSource', 'domainClass', 'hibernate']
+	def pluginExcludes = [
+		'docs/**',
+		'src/docs/**'
+	]
 
 	def doWithSpring = {
 

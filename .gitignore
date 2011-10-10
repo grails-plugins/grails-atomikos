@@ -1,6 +1,5 @@
 stacktrace.log
 /target
-/docs
 /grails-atomikos-*.zip
 /plugin.xml
 /.settings

@@ -1,0 +1,290 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>5 Tutorial 1.0</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/1%20Introduction%20to%20the%20Atomikos%20Plugin.html"><strong>1</strong><span>Introduction to the Atomikos Plugin</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/2%20Getting%20Started.html"><strong>2</strong><span>Getting Started</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/3%20DataSource%20Configuration.html"><strong>3</strong><span>DataSource Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/4%20JMS%20Configuration%20and%20Usage.html"><strong>4</strong><span>JMS Configuration and Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/5%20Tutorial.html"><strong>5</strong><span>Tutorial</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>Integrates Atomikos TransactionsEssentials to support two-phase commit for JDBC and JMS transactions</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/4%20JMS%20Configuration%20and%20Usage.html">&lt;&lt; <strong>4</strong><span>JMS Configuration and Usage</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+
+
+                <div class="project">
+                    <h1>5 Tutorial - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Burt Beckwith</p>
+
+                    <p><strong>Version:</strong> 1.0</p>
+                </div>
+
+                
+                <div id="table-of-content">
+                    <h2>Table of Contents</h2>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#5.1%20JDBC"><strong>5.1</strong><span>JDBC</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#5.2%20JDBC%20Testing"><strong>5.2</strong><span>JDBC Testing</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#5.3%20JMS"><strong>5.3</strong><span>JMS</span></a>
+                    </div>
+                    
+                </div>
+                
+
+                
+
+<h1 id="5 Tutorial">5 Tutorial</h1>
+First create a test application:<p class="paragraph"/><div class="code"><pre>$ grails create&#45;app atomikostest
+$ cd atomikostest</pre></div><p class="paragraph"/>and install the <a href="http://grails.org/plugin/atomikos/" target="blank">atomikos</a> plugin:<p class="paragraph"/><div class="code"><pre>$ grails install&#45;plugin atomikos</pre></div><p class="paragraph"/>
+
+
+<h2 id="5.1 JDBC">5.1 JDBC</h2>
+Convert the development H2 datasource to XA by adding an <code>xaConfig</code> attribute:<p class="paragraph"/><div class="code"><pre>environments &#123;
+   development &#123;
+      dataSource &#123;
+         dbCreate = 'update'
+         url = 'jdbc:h2:db/devDb;MVCC=TRUE'
+         xaConfig = &#91;
+            driverClassName: 'org.h2.jdbcx.JdbcDataSource',
+            driverProperties: &#91;
+               URL: 'jdbc:h2:db/devDb;MVCC=TRUE',
+               user: 'sa',
+               password: ''&#93;,
+            minPoolSize: 1,
+            maxPoolSize: 50
+         &#93;
+      &#125;
+   &#125;
+   &#8230;
+&#125;</pre></div><p class="paragraph"/>Note that the datasource has also been changed to file-based so it persists between runs. This isn't required but makes it easier to look at the database when the application isn't running.<p class="paragraph"/>Create a second datasource for a MySQL database:<p class="paragraph"/><div class="code"><pre>dataSource_mysql &#123;
+   dbCreate = 'update'
+   url = 'jdbc:mysql://localhost/xatest'
+   driverClassName = 'com.mysql.jdbc.Driver'
+   username = 'xatest'
+   password = 'xatest'
+   xaConfig = &#91;
+      driverClassName: 'com.mysql.jdbc.jdbc2.optional.MysqlXADataSource',
+      driverProperties: &#91;
+         URL: 'jdbc:mysql://localhost/xatest',
+         user: 'xatest',
+         password: 'xatest',
+         autoReconnect: <span class="java&#45;keyword">true</span>,
+         autoReconnectForConnectionPools: <span class="java&#45;keyword">true</span>,
+         autoReconnectForPools: <span class="java&#45;keyword">true</span>&#93;,
+      minPoolSize: 1,
+      maxPoolSize: 50
+   &#93;
+&#125;</pre></div><p class="paragraph"/>The name "dataSource_mysql" is just a suggestion; use whatever you want after "dataSource_". This datasource definition assumes that you have a MySQL database named "xatest" with a user "xatest" that has been granted access using the password "xatest". Change those values as needed.<p class="paragraph"/><h4>Domain classes</h4><p class="paragraph"/>Create a domain class that will use the default H2 database:<p class="paragraph"/><div class="code"><pre>$ grails create&#45;domain&#45;class H2Thing</pre></div><p class="paragraph"/>and change the code so it looks like this:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">package</span> atomikostest<p class="paragraph"/>class H2Thing &#123;
+   <span class="java&#45;object">String</span> name
+&#125;</pre></div><p class="paragraph"/>Create a domain class that will use the MySQL database:<p class="paragraph"/><div class="code"><pre>$ grails create&#45;domain&#45;class MySQLThing</pre></div><p class="paragraph"/>and change the code so it looks like this:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">package</span> atomikostest<p class="paragraph"/>class MySQLThing &#123;
+   <span class="java&#45;object">String</span> name<p class="paragraph"/>   <span class="java&#45;keyword">static</span> mapping = &#123;
+      datasource 'mysql'
+   &#125;
+&#125;</pre></div><p class="paragraph"/><h4>Dependencies</h4><p class="paragraph"/>To use MySQL you'll need the JDBC driver, so add the <code>mavenLocal()</code> and <code>mavenCentral()</code> repositories and the mysql-connector dependency to BuildConfig.groovy:<p class="paragraph"/><div class="code"><pre>repositories &#123;
+   inherits <span class="java&#45;keyword">true</span>
+   grailsPlugins()
+   grailsHome()
+   grailsCentral()<p class="paragraph"/>   mavenLocal()
+   mavenCentral()
+&#125;<p class="paragraph"/>dependencies &#123;
+   runtime 'mysql:mysql&#45;connector&#45;java:5.1.16'
+&#125;</pre></div><p class="paragraph"/><h4>schema-export</h4><p class="paragraph"/>You can verify that the domain classes are in separate datasources by running the <a href="http://grails.org/doc/latest/ref/Command%20Line/schema-export.html" target="blank">schema-export</a> script for each. Run the script for the default datasource:<p class="paragraph"/><div class="code"><pre>$ grails schema&#45;export</pre></div><p class="paragraph"/>and you should only see a "create table" statement for the "h2thing" table in <code>target/ddl.sql</code>. Run it again for the other datasource:<p class="paragraph"/><div class="code"><pre>$ grails schema&#45;export &#45;&#45;datasource=mysql</pre></div><p class="paragraph"/>and you should only see a "create table" statement for the "mysqlthing" table in <code>target/ddl.sql</code>.<p class="paragraph"/>
+
+
+<h2 id="5.2 JDBC Testing">5.2 JDBC Testing</h2>
+To test two-phase commit with the two databases, create a transactional service:<p class="paragraph"/><div class="code"><pre>$ grails create&#45;service XaTest</pre></div><p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">package</span> atomikostest<p class="paragraph"/>class XaTestService &#123;<p class="paragraph"/>   void failAfterH2() &#123;
+      assert <span class="java&#45;keyword">new</span> MySQLThing(name: 'test MySQL').save(flush: <span class="java&#45;keyword">true</span>)
+      assert <span class="java&#45;keyword">new</span> H2Thing(name: 'test H2').save(flush: <span class="java&#45;keyword">true</span>)
+      <span class="java&#45;keyword">throw</span> <span class="java&#45;keyword">new</span> RuntimeException('forcing an auto rollback in failAfterH2')
+   &#125;<p class="paragraph"/>   void failAfterMySQL() &#123;
+      assert <span class="java&#45;keyword">new</span> H2Thing(name: 'test H2').save(flush: <span class="java&#45;keyword">true</span>)
+      assert <span class="java&#45;keyword">new</span> MySQLThing(name: 'test MySQL').save(flush: <span class="java&#45;keyword">true</span>)
+      <span class="java&#45;keyword">throw</span> <span class="java&#45;keyword">new</span> RuntimeException('forcing an auto rollback in failAfterH2')
+   &#125;<p class="paragraph"/>   void succeedBoth() &#123;
+      assert <span class="java&#45;keyword">new</span> H2Thing(name: 'test H2').save(flush: <span class="java&#45;keyword">true</span>)
+      assert <span class="java&#45;keyword">new</span> MySQLThing(name: 'test MySQL').save(flush: <span class="java&#45;keyword">true</span>)
+   &#125;
+&#125;</pre></div><p class="paragraph"/>To verify that an unchecked runtime exception will automatically roll back even flushed instances, there are two methods that create and flush valid instances and then throw an exception, <code>failAfterH2()</code> and <code>failAfterMySQL()</code>. <code>succeedBoth()</code> doesn't throw an exception, so it should successfully create both. You could create a controller to test these, but it's simpler to use the Grails console:<p class="paragraph"/><div class="code"><pre>$ grails console</pre></div><p class="paragraph"/>First try <code>failAfterH2()</code>:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> atomikostest.H2Thing
+<span class="java&#45;keyword">import</span> atomikostest.MySQLThing<p class="paragraph"/><span class="java&#45;object">int</span> h2ThingCount = H2Thing.count()
+<span class="java&#45;object">int</span> mySQLCount = MySQLThing.count()<p class="paragraph"/>def xaTestService = ctx.xaTestService<p class="paragraph"/><span class="java&#45;keyword">try</span> &#123;
+   xaTestService.failAfterH2()
+   println <span class="java&#45;quote">"uh oh, no exception?"</span>
+&#125;
+<span class="java&#45;keyword">catch</span> (e) &#123;
+   println <span class="java&#45;quote">"caught exception: $e.message"</span>
+&#125;<p class="paragraph"/>assert h2ThingCount == H2Thing.count()
+assert mySQLCount == MySQLThing.count()</pre></div><p class="paragraph"/>and then the same for <code>failAfterMySQL()</code>:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> atomikostest.H2Thing
+<span class="java&#45;keyword">import</span> atomikostest.MySQLThing<p class="paragraph"/><span class="java&#45;object">int</span> h2ThingCount = H2Thing.count()
+<span class="java&#45;object">int</span> mySQLCount = MySQLThing.count()<p class="paragraph"/>def xaTestService = ctx.xaTestService<p class="paragraph"/><span class="java&#45;keyword">try</span> &#123;
+   xaTestService.failAfterMySQL()
+   println <span class="java&#45;quote">"uh oh, no exception?"</span>
+&#125;
+<span class="java&#45;keyword">catch</span> (e) &#123;
+   println <span class="java&#45;quote">"caught exception: $e.message"</span>
+&#125;<p class="paragraph"/>assert h2ThingCount == H2Thing.count()
+assert mySQLCount == MySQLThing.count()</pre></div><p class="paragraph"/>Finally, execute the success case to see that the instances do get created:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> atomikostest.H2Thing
+<span class="java&#45;keyword">import</span> atomikostest.MySQLThing<p class="paragraph"/><span class="java&#45;object">int</span> h2ThingCount = H2Thing.count()
+<span class="java&#45;object">int</span> mySQLCount = MySQLThing.count()<p class="paragraph"/>def xaTestService = ctx.xaTestService<p class="paragraph"/>xaTestService.succeedBoth()<p class="paragraph"/>assert h2ThingCount + 1 == H2Thing.count()
+assert mySQLCount + 1 == MySQLThing.count()</pre></div><p class="paragraph"/>
+
+
+<h2 id="5.3 JMS">5.3 JMS</h2>
+Now let's add JMS to the mix. Install the <a href="http://grails.org/plugin/jms" target="blank">jms</a> plugin:<p class="paragraph"/><div class="code"><pre>$ grails install&#45;plugin jms</pre></div><p class="paragraph"/>and add ActiveMQ jars as dependencies in <code>grails-app/conf/BuildConfig.groovy</code> since the JMS plugin doesn't provide a JMS implementation:<p class="paragraph"/><div class="code"><pre>dependencies &#123;
+   runtime 'mysql:mysql&#45;connector&#45;java:5.1.16'<p class="paragraph"/>   compile('org.apache.activemq:activemq&#45;core:5.5.0') &#123; transitive = <span class="java&#45;keyword">false</span> &#125;
+   runtime('org.apache.activemq:kahadb:5.5.0')        &#123; transitive = <span class="java&#45;keyword">false</span> &#125;
+&#125;</pre></div><p class="paragraph"/>Register a connection factory and a queue for testing in <code>grails-app/conf/spring/resources.groovy</code>:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.apache.activemq.ActiveMQXAConnectionFactory
+<span class="java&#45;keyword">import</span> org.apache.activemq.command.ActiveMQQueue<p class="paragraph"/>beans = &#123;<p class="paragraph"/>   jmsConnectionFactory(ActiveMQXAConnectionFactory) &#123;
+      brokerURL = 'vm://localhost'
+   &#125;<p class="paragraph"/>   jtaQueue(ActiveMQQueue) &#123;
+      physicalName = 'jtaQueue'
+   &#125;
+&#125;</pre></div><p class="paragraph"/><h4>MessageTestService</h4><p class="paragraph"/>Create a service that will act as our listener:<p class="paragraph"/><div class="code"><pre>$ grails create&#45;service MessageTest</pre></div><p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">package</span> atomikostest<p class="paragraph"/>class MessageTestService &#123;<p class="paragraph"/>   <span class="java&#45;keyword">static</span> exposes = &#91;'jms'&#93;
+   <span class="java&#45;keyword">static</span> destination = 'jtaQueue'<p class="paragraph"/>   // NOT THREAD SAFE &#45; just <span class="java&#45;keyword">for</span> testing
+   def mostRecentMessage<p class="paragraph"/>   void onMessage(Map message) &#123;
+      mostRecentMessage = message
+      println <span class="java&#45;quote">"&#110;<span class="java&#45;keyword">new</span> message: $message&#110;"</span>
+   &#125;<p class="paragraph"/>   void onMessage(<span class="java&#45;object">String</span> message) &#123;
+      mostRecentMessage = message
+      println <span class="java&#45;quote">"&#110;<span class="java&#45;keyword">new</span> message: $message&#110;"</span>
+   &#125;
+&#125;</pre></div><p class="paragraph"/>Add some additional test methods to <code>XaTestService</code>:<p class="paragraph"/><div class="code"><pre>void failAfterJms() &#123;<p class="paragraph"/>   def thing = <span class="java&#45;keyword">new</span> MySQLThing(name: 'test JDBC').save(flush: <span class="java&#45;keyword">true</span>)
+   assert thing<p class="paragraph"/>   def message = &#91;thingId: thing.id, thingName: thing.name&#93;
+   jmsService.send 'jtaQueue', message<p class="paragraph"/>   <span class="java&#45;keyword">throw</span> <span class="java&#45;keyword">new</span> RuntimeException('forcing an auto rollback in failAfterJms')
+&#125;<p class="paragraph"/>void failAfterJdbc() &#123;
+   jmsService.send 'jtaQueue', <span class="java&#45;quote">"you won't get <span class="java&#45;keyword">this</span>"</span><p class="paragraph"/>   assert <span class="java&#45;keyword">new</span> MySQLThing(name: 'test JDBC').save(flush: <span class="java&#45;keyword">true</span>)<p class="paragraph"/>   <span class="java&#45;keyword">throw</span> <span class="java&#45;keyword">new</span> RuntimeException('forcing an auto rollback in failAfterJdbc')
+&#125;<p class="paragraph"/>void succeedJmsAndJdbc() &#123;
+   def thing = <span class="java&#45;keyword">new</span> MySQLThing(name: 'test JDBC').save(flush: <span class="java&#45;keyword">true</span>)
+   assert thing<p class="paragraph"/>   def message = &#91;thingId: thing.id, thingName: thing.name&#93;
+   jmsService.send 'jtaQueue', message
+&#125;</pre></div><p class="paragraph"/>Note that we only test MySQL here to demonstrate that JDBC and JMS work together, but H2 would work fine also.<p class="paragraph"/><h4>Testing in the console</h4><p class="paragraph"/>First try <code>failAfterJms()</code>:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> atomikostest.MySQLThing<p class="paragraph"/><span class="java&#45;object">int</span> mySQLCount = MySQLThing.count()<p class="paragraph"/>def xaTestService = ctx.xaTestService
+def messageTestService = ctx.messageTestService
+messageTestService.mostRecentMessage = <span class="java&#45;keyword">null</span><p class="paragraph"/><span class="java&#45;keyword">try</span> &#123;
+   xaTestService.failAfterJms()
+   println <span class="java&#45;quote">"uh oh, no exception?"</span>
+&#125;
+<span class="java&#45;keyword">catch</span> (e) &#123;
+   println <span class="java&#45;quote">"caught exception: $e.message"</span>
+&#125;<p class="paragraph"/>assert mySQLCount == MySQLThing.count()
+sleep 200
+assert messageTestService.mostRecentMessage == <span class="java&#45;keyword">null</span></pre></div><p class="paragraph"/>and then the same for <code>failAfterJdbc()</code>:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> atomikostest.MySQLThing<p class="paragraph"/><span class="java&#45;object">int</span> mySQLCount = MySQLThing.count()<p class="paragraph"/>def xaTestService = ctx.xaTestService
+def messageTestService = ctx.messageTestService
+messageTestService.mostRecentMessage = <span class="java&#45;keyword">null</span><p class="paragraph"/><span class="java&#45;keyword">try</span> &#123;
+   xaTestService.failAfterJdbc()
+   println <span class="java&#45;quote">"uh oh, no exception?"</span>
+&#125;
+<span class="java&#45;keyword">catch</span> (e) &#123;
+   println <span class="java&#45;quote">"caught exception: $e.message"</span>
+&#125;<p class="paragraph"/>assert mySQLCount == MySQLThing.count()
+sleep 200
+assert messageTestService.mostRecentMessage == <span class="java&#45;keyword">null</span></pre></div><p class="paragraph"/>Finally, execute the success case to see that the domain class instance does get created and the JMS message gets sent:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> atomikostest.MySQLThing<p class="paragraph"/><span class="java&#45;object">int</span> mySQLCount = MySQLThing.count()<p class="paragraph"/>def xaTestService = ctx.xaTestService
+def messageTestService = ctx.messageTestService
+messageTestService.mostRecentMessage = <span class="java&#45;keyword">null</span><p class="paragraph"/>xaTestService.succeedJmsAndJdbc()<p class="paragraph"/>assert mySQLCount + 1 == MySQLThing.count()
+sleep 200
+assert messageTestService.mostRecentMessage <span class="java&#45;keyword">instanceof</span> Map</pre></div><p class="paragraph"/>Note that the <code>mostRecentMessage</code> assertions can occasionally fail since JMS messages are sent and received asynchronously. The <code>sleep()</code> call should be sufficient but if things are running slowly you can get a false failure.<p class="paragraph"/>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/4%20JMS%20Configuration%20and%20Usage.html">&lt;&lt; <strong>4</strong><span>JMS Configuration and Usage</span></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-16219500-1']);
+	_gaq.push(['_trackPageview']);
+
+	(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+</script>
+</body>
+</html>

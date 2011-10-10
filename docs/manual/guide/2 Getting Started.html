@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>2 Getting Started 1.0</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/1%20Introduction%20to%20the%20Atomikos%20Plugin.html"><strong>1</strong><span>Introduction to the Atomikos Plugin</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/2%20Getting%20Started.html"><strong>2</strong><span>Getting Started</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/3%20DataSource%20Configuration.html"><strong>3</strong><span>DataSource Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/4%20JMS%20Configuration%20and%20Usage.html"><strong>4</strong><span>JMS Configuration and Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/5%20Tutorial.html"><strong>5</strong><span>Tutorial</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>Integrates Atomikos TransactionsEssentials to support two-phase commit for JDBC and JMS transactions</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/1%20Introduction%20to%20the%20Atomikos%20Plugin.html">&lt;&lt; <strong>1</strong><span>Introduction to the Atomikos Plugin</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/3%20DataSource%20Configuration.html"><strong>3</strong><span>DataSource Configuration</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>2 Getting Started - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Burt Beckwith</p>
+
+                    <p><strong>Version:</strong> 1.0</p>
+                </div>
+
+                
+
+                
+
+<h1 id="2 Getting Started">2 Getting Started</h1>
+The first thing you need to do is install the plugin:<p class="paragraph"/><div class="code"><pre>$ grails install&#45;plugin atomikos</pre></div><p class="paragraph"/><h4>Configuration</h4><p class="paragraph"/>Ordinarily Atomikos is configured with a properties file named jta.properties but the plugin makes this simpler by letting you specify properties in <code>Config.groovy</code>. The configuration key is <code>grails.plugin.atomikos.uts</code> and the default values set by the plugin are<p class="paragraph"/><div class="code"><pre>'com.atomikos.icatch.console_file_name': 'tm.out',
+'com.atomikos.icatch.log_base_name': 'tmlog',
+'com.atomikos.icatch.tm_unique_name': 'atomikosTransactionManager',
+'com.atomikos.icatch.console_log_level': 'INFO',
+'com.atomikos.icatch.log_base_dir': 'target/atomikos',
+'com.atomikos.icatch.output_dir': 'target/atomikos',
+'com.atomikos.icatch.force_shutdown_on_vm_exit': '<span class="java&#45;keyword">true</span>'</pre></div><p class="paragraph"/>You can override these in <code>Config.groovy</code>, e.g.<p class="paragraph"/><div class="code"><pre>grails.plugin.atomikos.uts = &#91;
+   'com.atomikos.icatch.console_file_name': 'tm.out',
+   'com.atomikos.icatch.log_base_name': 'tmlog',
+   'com.atomikos.icatch.tm_unique_name': 'myTransactionManager',
+   'com.atomikos.icatch.console_log_level': 'ERROR',
+   'com.atomikos.icatch.log_base_dir': 'target/atomikos',
+   'com.atomikos.icatch.output_dir': 'target/atomikos',
+   'com.atomikos.icatch.force_shutdown_on_vm_exit': '<span class="java&#45;keyword">true</span>'&#93;</pre></div><p class="paragraph"/>Note that you can't override individual values since it's a single property - you need to keep any values that you want to retain, and add, remove, or change values that should be different.<p class="paragraph"/>See the <a href="http://www.atomikos.com/Documentation/JtaProperties" target="blank">Atomikos web site</a> for a description of the various supported properties.<p class="paragraph"/>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/1%20Introduction%20to%20the%20Atomikos%20Plugin.html">&lt;&lt; <strong>1</strong><span>Introduction to the Atomikos Plugin</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/3%20DataSource%20Configuration.html"><strong>3</strong><span>DataSource Configuration</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-16219500-1']);
+	_gaq.push(['_trackPageview']);
+
+	(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+</script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>5.1 JDBC 1.0</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/1%20Introduction%20to%20the%20Atomikos%20Plugin.html"><strong>1</strong><span>Introduction to the Atomikos Plugin</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/2%20Getting%20Started.html"><strong>2</strong><span>Getting Started</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/3%20DataSource%20Configuration.html"><strong>3</strong><span>DataSource Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/4%20JMS%20Configuration%20and%20Usage.html"><strong>4</strong><span>JMS Configuration and Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/5%20Tutorial.html"><strong>5</strong><span>Tutorial</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>Integrates Atomikos TransactionsEssentials to support two-phase commit for JDBC and JMS transactions</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../../guide/4%20JMS%20Configuration%20and%20Usage.html">&lt;&lt; <strong>4</strong><span>JMS Configuration and Usage</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+
+
+                <div class="project">
+                    <h1>5.1 JDBC - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Burt Beckwith</p>
+
+                    <p><strong>Version:</strong> 1.0</p>
+                </div>
+
+                
+
+                
+
+<h2 id="5.1 JDBC">5.1 JDBC</h2>
+Convert the development H2 datasource to XA by adding an <code>xaConfig</code> attribute:<p class="paragraph"/><div class="code"><pre>environments &#123;
+   development &#123;
+      dataSource &#123;
+         dbCreate = 'update'
+         url = 'jdbc:h2:db/devDb;MVCC=TRUE'
+         xaConfig = &#91;
+            driverClassName: 'org.h2.jdbcx.JdbcDataSource',
+            driverProperties: &#91;
+               URL: 'jdbc:h2:db/devDb;MVCC=TRUE',
+               user: 'sa',
+               password: ''&#93;,
+            minPoolSize: 1,
+            maxPoolSize: 50
+         &#93;
+      &#125;
+   &#125;
+   &#8230;
+&#125;</pre></div><p class="paragraph"/>Note that the datasource has also been changed to file-based so it persists between runs. This isn't required but makes it easier to look at the database when the application isn't running.<p class="paragraph"/>Create a second datasource for a MySQL database:<p class="paragraph"/><div class="code"><pre>dataSource_mysql &#123;
+   dbCreate = 'update'
+   url = 'jdbc:mysql://localhost/xatest'
+   driverClassName = 'com.mysql.jdbc.Driver'
+   username = 'xatest'
+   password = 'xatest'
+   xaConfig = &#91;
+      driverClassName: 'com.mysql.jdbc.jdbc2.optional.MysqlXADataSource',
+      driverProperties: &#91;
+         URL: 'jdbc:mysql://localhost/xatest',
+         user: 'xatest',
+         password: 'xatest',
+         autoReconnect: <span class="java&#45;keyword">true</span>,
+         autoReconnectForConnectionPools: <span class="java&#45;keyword">true</span>,
+         autoReconnectForPools: <span class="java&#45;keyword">true</span>&#93;,
+      minPoolSize: 1,
+      maxPoolSize: 50
+   &#93;
+&#125;</pre></div><p class="paragraph"/>The name "dataSource_mysql" is just a suggestion; use whatever you want after "dataSource_". This datasource definition assumes that you have a MySQL database named "xatest" with a user "xatest" that has been granted access using the password "xatest". Change those values as needed.<p class="paragraph"/><h4>Domain classes</h4><p class="paragraph"/>Create a domain class that will use the default H2 database:<p class="paragraph"/><div class="code"><pre>$ grails create&#45;domain&#45;class H2Thing</pre></div><p class="paragraph"/>and change the code so it looks like this:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">package</span> atomikostest<p class="paragraph"/>class H2Thing &#123;
+   <span class="java&#45;object">String</span> name
+&#125;</pre></div><p class="paragraph"/>Create a domain class that will use the MySQL database:<p class="paragraph"/><div class="code"><pre>$ grails create&#45;domain&#45;class MySQLThing</pre></div><p class="paragraph"/>and change the code so it looks like this:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">package</span> atomikostest<p class="paragraph"/>class MySQLThing &#123;
+   <span class="java&#45;object">String</span> name<p class="paragraph"/>   <span class="java&#45;keyword">static</span> mapping = &#123;
+      datasource 'mysql'
+   &#125;
+&#125;</pre></div><p class="paragraph"/><h4>Dependencies</h4><p class="paragraph"/>To use MySQL you'll need the JDBC driver, so add the <code>mavenLocal()</code> and <code>mavenCentral()</code> repositories and the mysql-connector dependency to BuildConfig.groovy:<p class="paragraph"/><div class="code"><pre>repositories &#123;
+   inherits <span class="java&#45;keyword">true</span>
+   grailsPlugins()
+   grailsHome()
+   grailsCentral()<p class="paragraph"/>   mavenLocal()
+   mavenCentral()
+&#125;<p class="paragraph"/>dependencies &#123;
+   runtime 'mysql:mysql&#45;connector&#45;java:5.1.16'
+&#125;</pre></div><p class="paragraph"/><h4>schema-export</h4><p class="paragraph"/>You can verify that the domain classes are in separate datasources by running the <a href="http://grails.org/doc/latest/ref/Command%20Line/schema-export.html" target="blank">schema-export</a> script for each. Run the script for the default datasource:<p class="paragraph"/><div class="code"><pre>$ grails schema&#45;export</pre></div><p class="paragraph"/>and you should only see a "create table" statement for the "h2thing" table in <code>target/ddl.sql</code>. Run it again for the other datasource:<p class="paragraph"/><div class="code"><pre>$ grails schema&#45;export &#45;&#45;datasource=mysql</pre></div><p class="paragraph"/>and you should only see a "create table" statement for the "mysqlthing" table in <code>target/ddl.sql</code>.<p class="paragraph"/>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../../guide/4%20JMS%20Configuration%20and%20Usage.html">&lt;&lt; <strong>4</strong><span>JMS Configuration and Usage</span></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-16219500-1']);
+	_gaq.push(['_trackPageview']);
+
+	(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+</script>
+</body>
+</html>

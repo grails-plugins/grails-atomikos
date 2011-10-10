@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>5.2 JDBC Testing 1.0</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/1%20Introduction%20to%20the%20Atomikos%20Plugin.html"><strong>1</strong><span>Introduction to the Atomikos Plugin</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/2%20Getting%20Started.html"><strong>2</strong><span>Getting Started</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/3%20DataSource%20Configuration.html"><strong>3</strong><span>DataSource Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/4%20JMS%20Configuration%20and%20Usage.html"><strong>4</strong><span>JMS Configuration and Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/5%20Tutorial.html"><strong>5</strong><span>Tutorial</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>Integrates Atomikos TransactionsEssentials to support two-phase commit for JDBC and JMS transactions</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../../guide/4%20JMS%20Configuration%20and%20Usage.html">&lt;&lt; <strong>4</strong><span>JMS Configuration and Usage</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+
+
+                <div class="project">
+                    <h1>5.2 JDBC Testing - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Burt Beckwith</p>
+
+                    <p><strong>Version:</strong> 1.0</p>
+                </div>
+
+                
+
+                
+
+<h2 id="5.2 JDBC Testing">5.2 JDBC Testing</h2>
+To test two-phase commit with the two databases, create a transactional service:<p class="paragraph"/><div class="code"><pre>$ grails create&#45;service XaTest</pre></div><p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">package</span> atomikostest<p class="paragraph"/>class XaTestService &#123;<p class="paragraph"/>   void failAfterH2() &#123;
+      assert <span class="java&#45;keyword">new</span> MySQLThing(name: 'test MySQL').save(flush: <span class="java&#45;keyword">true</span>)
+      assert <span class="java&#45;keyword">new</span> H2Thing(name: 'test H2').save(flush: <span class="java&#45;keyword">true</span>)
+      <span class="java&#45;keyword">throw</span> <span class="java&#45;keyword">new</span> RuntimeException('forcing an auto rollback in failAfterH2')
+   &#125;<p class="paragraph"/>   void failAfterMySQL() &#123;
+      assert <span class="java&#45;keyword">new</span> H2Thing(name: 'test H2').save(flush: <span class="java&#45;keyword">true</span>)
+      assert <span class="java&#45;keyword">new</span> MySQLThing(name: 'test MySQL').save(flush: <span class="java&#45;keyword">true</span>)
+      <span class="java&#45;keyword">throw</span> <span class="java&#45;keyword">new</span> RuntimeException('forcing an auto rollback in failAfterH2')
+   &#125;<p class="paragraph"/>   void succeedBoth() &#123;
+      assert <span class="java&#45;keyword">new</span> H2Thing(name: 'test H2').save(flush: <span class="java&#45;keyword">true</span>)
+      assert <span class="java&#45;keyword">new</span> MySQLThing(name: 'test MySQL').save(flush: <span class="java&#45;keyword">true</span>)
+   &#125;
+&#125;</pre></div><p class="paragraph"/>To verify that an unchecked runtime exception will automatically roll back even flushed instances, there are two methods that create and flush valid instances and then throw an exception, <code>failAfterH2()</code> and <code>failAfterMySQL()</code>. <code>succeedBoth()</code> doesn't throw an exception, so it should successfully create both. You could create a controller to test these, but it's simpler to use the Grails console:<p class="paragraph"/><div class="code"><pre>$ grails console</pre></div><p class="paragraph"/>First try <code>failAfterH2()</code>:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> atomikostest.H2Thing
+<span class="java&#45;keyword">import</span> atomikostest.MySQLThing<p class="paragraph"/><span class="java&#45;object">int</span> h2ThingCount = H2Thing.count()
+<span class="java&#45;object">int</span> mySQLCount = MySQLThing.count()<p class="paragraph"/>def xaTestService = ctx.xaTestService<p class="paragraph"/><span class="java&#45;keyword">try</span> &#123;
+   xaTestService.failAfterH2()
+   println <span class="java&#45;quote">"uh oh, no exception?"</span>
+&#125;
+<span class="java&#45;keyword">catch</span> (e) &#123;
+   println <span class="java&#45;quote">"caught exception: $e.message"</span>
+&#125;<p class="paragraph"/>assert h2ThingCount == H2Thing.count()
+assert mySQLCount == MySQLThing.count()</pre></div><p class="paragraph"/>and then the same for <code>failAfterMySQL()</code>:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> atomikostest.H2Thing
+<span class="java&#45;keyword">import</span> atomikostest.MySQLThing<p class="paragraph"/><span class="java&#45;object">int</span> h2ThingCount = H2Thing.count()
+<span class="java&#45;object">int</span> mySQLCount = MySQLThing.count()<p class="paragraph"/>def xaTestService = ctx.xaTestService<p class="paragraph"/><span class="java&#45;keyword">try</span> &#123;
+   xaTestService.failAfterMySQL()
+   println <span class="java&#45;quote">"uh oh, no exception?"</span>
+&#125;
+<span class="java&#45;keyword">catch</span> (e) &#123;
+   println <span class="java&#45;quote">"caught exception: $e.message"</span>
+&#125;<p class="paragraph"/>assert h2ThingCount == H2Thing.count()
+assert mySQLCount == MySQLThing.count()</pre></div><p class="paragraph"/>Finally, execute the success case to see that the instances do get created:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> atomikostest.H2Thing
+<span class="java&#45;keyword">import</span> atomikostest.MySQLThing<p class="paragraph"/><span class="java&#45;object">int</span> h2ThingCount = H2Thing.count()
+<span class="java&#45;object">int</span> mySQLCount = MySQLThing.count()<p class="paragraph"/>def xaTestService = ctx.xaTestService<p class="paragraph"/>xaTestService.succeedBoth()<p class="paragraph"/>assert h2ThingCount + 1 == H2Thing.count()
+assert mySQLCount + 1 == MySQLThing.count()</pre></div><p class="paragraph"/>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../../guide/4%20JMS%20Configuration%20and%20Usage.html">&lt;&lt; <strong>4</strong><span>JMS Configuration and Usage</span></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-16219500-1']);
+	_gaq.push(['_trackPageview']);
+
+	(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+</script>
+</body>
+</html>

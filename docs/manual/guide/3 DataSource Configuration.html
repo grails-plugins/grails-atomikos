@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>3 DataSource Configuration 1.0</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/1%20Introduction%20to%20the%20Atomikos%20Plugin.html"><strong>1</strong><span>Introduction to the Atomikos Plugin</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/2%20Getting%20Started.html"><strong>2</strong><span>Getting Started</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/3%20DataSource%20Configuration.html"><strong>3</strong><span>DataSource Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/4%20JMS%20Configuration%20and%20Usage.html"><strong>4</strong><span>JMS Configuration and Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/5%20Tutorial.html"><strong>5</strong><span>Tutorial</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>Integrates Atomikos TransactionsEssentials to support two-phase commit for JDBC and JMS transactions</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/2%20Getting%20Started.html">&lt;&lt; <strong>2</strong><span>Getting Started</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/4%20JMS%20Configuration%20and%20Usage.html"><strong>4</strong><span>JMS Configuration and Usage</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>3 DataSource Configuration - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Burt Beckwith</p>
+
+                    <p><strong>Version:</strong> 1.0</p>
+                </div>
+
+                
+
+                
+
+<h1 id="3 DataSource Configuration">3 DataSource Configuration</h1>
+To configure a DataSource to use XA, add an <code>xaConfig</code> <code>Map</code> in the datasource configuration in <code>grails-app/conf/DataSource.groovy</code>.<p class="paragraph"/>For example, suppose your primary DataSource uses MySQL and you also have a second one that uses H2. You would add <code>xaConfig</code> sections like these to your datasource definitions:<p class="paragraph"/><div class="code"><pre>dataSource &#123;
+   dbCreate = 'create&#45;drop'
+   url = 'jdbc:mysql://localhost/database_name'
+   driverClassName = 'com.mysql.jdbc.Driver'
+   username = 'username'
+   password = 'password'
+   xaConfig = &#91;
+      driverClassName: 'com.mysql.jdbc.jdbc2.optional.MysqlXADataSource',
+      driverProperties: &#91;
+         URL: 'jdbc:mysql://localhost/database_name',
+         user: 'username',
+         password: 'password',
+         autoReconnect: <span class="java&#45;keyword">true</span>,
+         autoReconnectForConnectionPools: <span class="java&#45;keyword">true</span>,
+         autoReconnectForPools: <span class="java&#45;keyword">true</span>&#93;
+      minPoolSize: 1,
+      maxPoolSize: 50
+   &#93;
+&#125;<p class="paragraph"/>dataSource_h2 &#123;
+   dbCreate = 'create&#45;drop'
+   url = 'jdbc:h2:db/devDb;MVCC=TRUE'
+   driverClassName = 'org.h2.Driver'
+   username = 'sa'
+   password = ''
+   xaConfig = &#91;
+      driverClassName: 'org.h2.jdbcx.JdbcDataSource',
+      driverProperties: &#91;
+         URL: 'jdbc:h2:db/devDb;MVCC=TRUE',
+         user: 'sa',
+         password: ''&#93;,
+      minPoolSize: 1,
+      maxPoolSize: 50
+   &#93;
+&#125;</pre></div><p class="paragraph"/><code>driverClassName</code> and <code>driverProperties</code> are required; the <code>driverProperties</code> are used to configure the XA pool specified by <code>driverClassName</code> and are driver-specific. All other properties are passed through to the <code>AtomikosDataSourceBean</code>.<p class="paragraph"/>Unfortunately some of the information is redundant (url, username, password) since there's no standard API for XA datasource configuration options and each driver will have its own attribute names. But using this approach it's possible to use the datasource as a non-XA datasource if you wish.<p class="paragraph"/>Your Hibernate <code>SessionFactory</code> bean(s) will automatically be configured to use the Atomikos JTA transaction factory and transaction manager; no other configuration is required.<p class="paragraph"/><h4>Disabling XA for individual DataSources</h4><p class="paragraph"/>By default all DataSource beans will be updated to be XA datasources. If you want to skip this enhancement for one or more datasources, add a configuration option for the <code>grails.plugin.atomikos.convert.&#60;beanname&#62;</code> attribute for each in <code>grails-app/conf/Config.groovy</code>, e.g.:<p class="paragraph"/><div class="code"><pre>grails.plugin.atomikos.convert.dataSource_h2 = <span class="java&#45;keyword">false</span></pre></div><p class="paragraph"/>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/2%20Getting%20Started.html">&lt;&lt; <strong>2</strong><span>Getting Started</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/4%20JMS%20Configuration%20and%20Usage.html"><strong>4</strong><span>JMS Configuration and Usage</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-16219500-1']);
+	_gaq.push(['_trackPageview']);
+
+	(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+</script>
+</body>
+</html>

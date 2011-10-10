@@ -1,0 +1,13 @@
+First create a test application:
+
+{code}
+$ grails create-app atomikostest
+$ cd atomikostest
+{code}
+
+and install the [atomikos|http://grails.org/plugin/atomikos/] plugin:
+
+{code}
+$ grails install-plugin atomikos
+{code}
+

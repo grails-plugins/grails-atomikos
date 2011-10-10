@@ -1,0 +1,125 @@
+Convert the development H2 datasource to XA by adding an @xaConfig@ attribute:
+
+{code}
+environments {
+   development {
+      dataSource {
+         dbCreate = 'update'
+         url = 'jdbc:h2:db/devDb;MVCC=TRUE'
+         xaConfig = [
+            driverClassName: 'org.h2.jdbcx.JdbcDataSource',
+            driverProperties: [
+               URL: 'jdbc:h2:db/devDb;MVCC=TRUE',
+               user: 'sa',
+               password: ''],
+            minPoolSize: 1,
+            maxPoolSize: 50
+         ]
+      }
+   }
+   ...
+}
+{code}
+
+Note that the datasource has also been changed to file-based so it persists between runs. This isn't required but makes it easier to look at the database when the application isn't running.
+
+Create a second datasource for a MySQL database:
+
+{code}
+dataSource_mysql {
+   dbCreate = 'update'
+   url = 'jdbc:mysql://localhost/xatest'
+   driverClassName = 'com.mysql.jdbc.Driver'
+   username = 'xatest'
+   password = 'xatest'
+   xaConfig = [
+      driverClassName: 'com.mysql.jdbc.jdbc2.optional.MysqlXADataSource',
+      driverProperties: [
+         URL: 'jdbc:mysql://localhost/xatest',
+         user: 'xatest',
+         password: 'xatest',
+         autoReconnect: true,
+         autoReconnectForConnectionPools: true,
+         autoReconnectForPools: true],
+      minPoolSize: 1,
+      maxPoolSize: 50
+   ]
+}
+{code}
+
+The name "dataSource_mysql" is just a suggestion; use whatever you want after "dataSource_". This datasource definition assumes that you have a MySQL database named "xatest" with a user "xatest" that has been granted access using the password "xatest". Change those values as needed.
+
+h4. Domain classes
+
+Create a domain class that will use the default H2 database:
+
+{code}
+$ grails create-domain-class H2Thing
+{code}
+
+and change the code so it looks like this:
+
+{code}
+package atomikostest
+
+class H2Thing {
+   String name
+}
+{code}
+
+Create a domain class that will use the MySQL database:
+
+{code}
+$ grails create-domain-class MySQLThing
+{code}
+
+and change the code so it looks like this:
+
+{code}
+package atomikostest
+
+class MySQLThing {
+   String name
+
+   static mapping = {
+      datasource 'mysql'
+   }
+}
+{code}
+
+h4. Dependencies
+
+To use MySQL you'll need the JDBC driver, so add the @mavenLocal()@ and @mavenCentral()@ repositories and the mysql-connector dependency to BuildConfig.groovy:
+
+{code}
+repositories {
+   inherits true
+   grailsPlugins()
+   grailsHome()
+   grailsCentral()
+
+   mavenLocal()
+   mavenCentral()
+}
+
+dependencies {
+   runtime 'mysql:mysql-connector-java:5.1.16'
+}
+{code}
+
+h4. schema-export
+
+You can verify that the domain classes are in separate datasources by running the [schema-export|http://grails.org/doc/latest/ref/Command%20Line/schema-export.html] script for each. Run the script for the default datasource:
+
+{code}
+$ grails schema-export
+{code}
+
+and you should only see a "create table" statement for the "h2thing" table in @target/ddl.sql@. Run it again for the other datasource:
+
+{code}
+$ grails schema-export --datasource=mysql
+{code}
+
+and you should only see a "create table" statement for the "mysqlthing" table in @target/ddl.sql@.
+

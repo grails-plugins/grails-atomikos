@@ -1,0 +1,37 @@
+The first thing you need to do is install the plugin:
+
+{code}
+$ grails install-plugin atomikos
+{code}
+
+h4. Configuration
+
+Ordinarily Atomikos is configured with a properties file named jta.properties but the plugin makes this simpler by letting you specify properties in @Config.groovy@. The configuration key is @grails.plugin.atomikos.uts@ and the default values set by the plugin are
+
+{code}
+'com.atomikos.icatch.console_file_name': 'tm.out',
+'com.atomikos.icatch.log_base_name': 'tmlog',
+'com.atomikos.icatch.tm_unique_name': 'atomikosTransactionManager',
+'com.atomikos.icatch.console_log_level': 'INFO',
+'com.atomikos.icatch.log_base_dir': 'target/atomikos',
+'com.atomikos.icatch.output_dir': 'target/atomikos',
+'com.atomikos.icatch.force_shutdown_on_vm_exit': 'true'
+{code}
+
+You can override these in @Config.groovy@, e.g.
+
+{code}
+grails.plugin.atomikos.uts = [
+   'com.atomikos.icatch.console_file_name': 'tm.out',
+   'com.atomikos.icatch.log_base_name': 'tmlog',
+   'com.atomikos.icatch.tm_unique_name': 'myTransactionManager',
+   'com.atomikos.icatch.console_log_level': 'ERROR',
+   'com.atomikos.icatch.log_base_dir': 'target/atomikos',
+   'com.atomikos.icatch.output_dir': 'target/atomikos',
+   'com.atomikos.icatch.force_shutdown_on_vm_exit': 'true']
+{code}
+
+Note that you can't override individual values since it's a single property - you need to keep any values that you want to retain, and add, remove, or change values that should be different.
+
+See the [Atomikos web site|http://www.atomikos.com/Documentation/JtaProperties] for a description of the various supported properties.
+

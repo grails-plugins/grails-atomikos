@@ -1,0 +1,3 @@
+The Atomikos plugin integrates the [Atomikos TransactionsEssentials JTA/XA libraries|http://www.atomikos.com/Main/TransactionsEssentials] to support two-phase commit between multiple datasources, JMS, and other XA-compliant providers. By adding extra information to your DataSource configuration(s) in DataSource.groovy you can let the plugin automatically enhance the DataSource beans for your, or by following the simple configuration steps described here you can manage things yourself.
+
+Since JMS isn't a part of Grails core there's less automatic support for using XA with JMS but the steps are described here to make the changes yourself.

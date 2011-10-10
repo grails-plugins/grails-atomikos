@@ -119,6 +119,7 @@ catch (e) {
 }
 
 assert mySQLCount == MySQLThing.count()
+sleep 200
 assert messageTestService.mostRecentMessage == null
 {code}
 
@@ -142,6 +143,7 @@ catch (e) {
 }
 
 assert mySQLCount == MySQLThing.count()
+sleep 200
 assert messageTestService.mostRecentMessage == null
 {code}
 
@@ -159,14 +161,9 @@ messageTestService.mostRecentMessage = null
 xaTestService.succeedJmsAndJdbc()
 
 assert mySQLCount + 1 == MySQLThing.count()
-assert messageTestService.mostRecentMessage instanceof Map
-{code}
-
-Note that the last assertion about the @mostRecentMessage@ being a Map can occasionally fail since JMS messages are sent and received asynchronously. You can add a @sleep()@ call to wait a bit and ensure that the message is sent and is correct:
-
-{code}
-...
-assert mySQLCount + 1 == MySQLThing.count()
 sleep 200
 assert messageTestService.mostRecentMessage instanceof Map
 {code}
+
+Note that the @mostRecentMessage@ assertions can occasionally fail since JMS messages are sent and received asynchronously. The @sleep()@ call should be sufficient but if things are running slowly you can get a false failure.
+

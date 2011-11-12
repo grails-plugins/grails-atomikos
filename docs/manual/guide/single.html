@@ -61,6 +61,7 @@ function addJsClass(el) {
                             <h1>Atomikos Plugin - Reference Documentation</h1>
                             <p><strong>Authors:</strong> Burt Beckwith</p>
                             <p><strong>Version:</strong> 1.0</p>
+                            
                         </div>
 
                         
@@ -91,7 +92,7 @@ function addJsClass(el) {
                         
 
 <h1 id="1 Introduction to the Atomikos Plugin">1 Introduction to the Atomikos Plugin</h1>
-The Atomikos plugin integrates the <a href="http://www.atomikos.com/Main/TransactionsEssentials" target="blank">Atomikos TransactionsEssentials JTA/XA libraries</a> to support two-phase commit between multiple datasources, JMS, and other XA-compliant providers. By adding extra information to your DataSource configuration(s) in DataSource.groovy you can let the plugin automatically enhance the DataSource beans for your, or by following the simple configuration steps described here you can manage things yourself.<p class="paragraph"/>Since JMS isn't a part of Grails core there's less automatic support for using XA with JMS but the steps are described here to make the changes yourself.
+The Atomikos plugin integrates the <a href="http://www.atomikos.com/Main/TransactionsEssentials" target="blank">Atomikos TransactionsEssentials JTA/XA libraries</a> to support two-phase commit between multiple datasources, JMS, and other XA-compliant providers. By adding extra information to your DataSource configuration(s) in DataSource.groovy you can let the plugin automatically enhance the DataSource beans for you, or by following the simple configuration steps described here you can manage things yourself.<p class="paragraph"/>Since JMS isn't a part of Grails core there's less automatic support for using XA with JMS but the steps are described here to make the changes yourself.
 
 
 
@@ -274,10 +275,10 @@ Now let's add JMS to the mix. Install the <a href="http://grails.org/plugin/jms"
    <span class="java&#45;keyword">static</span> destination = 'jtaQueue'<p class="paragraph"/>   // NOT THREAD SAFE &#45; just <span class="java&#45;keyword">for</span> testing
    def mostRecentMessage<p class="paragraph"/>   void onMessage(Map message) &#123;
       mostRecentMessage = message
-      println <span class="java&#45;quote">"&#110;<span class="java&#45;keyword">new</span> message: $message&#110;"</span>
+      println <span class="java&#45;quote">"&#92;n <span class="java&#45;keyword">new</span> message: $message&#92;n"</span>
    &#125;<p class="paragraph"/>   void onMessage(<span class="java&#45;object">String</span> message) &#123;
       mostRecentMessage = message
-      println <span class="java&#45;quote">"&#110;<span class="java&#45;keyword">new</span> message: $message&#110;"</span>
+      println <span class="java&#45;quote">"&#92;n <span class="java&#45;keyword">new</span> message: $message&#92;n"</span>
    &#125;
 &#125;</pre></div><p class="paragraph"/>Add some additional test methods to <code>XaTestService</code>:<p class="paragraph"/><div class="code"><pre>void failAfterJms() &#123;<p class="paragraph"/>   def thing = <span class="java&#45;keyword">new</span> MySQLThing(name: 'test JDBC').save(flush: <span class="java&#45;keyword">true</span>)
    assert thing<p class="paragraph"/>   def message = &#91;thingId: thing.id, thingName: thing.name&#93;

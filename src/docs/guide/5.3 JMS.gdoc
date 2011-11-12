@@ -54,12 +54,12 @@ class MessageTestService {
 
    void onMessage(Map message) {
       mostRecentMessage = message
-      println "\nnew message: $message\n"
+      println "\\\n new message: $message\\\n"
    }
 
    void onMessage(String message) {
       mostRecentMessage = message
-      println "\nnew message: $message\n"
+      println "\\\n new message: $message\\\n"
    }
 }
 {code}

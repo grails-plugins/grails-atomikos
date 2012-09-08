@@ -1,4 +1,4 @@
-/* Copyright 2011 SpringSource.
+/* Copyright 2011-2012 SpringSource.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,11 @@ class AtomikosGrailsPlugin {
 		'docs/**',
 		'src/docs/**'
 	]
+
+	String license = 'APACHE'
+	def organization = [name: 'SpringSource', url: 'http://www.springsource.org/']
+	def issueManagement = [system: 'JIRA', url: 'http://jira.grails.org/browse/GPATOMIKOS']
+	def scm = [url: 'https://github.com/grails-plugins/grails-atomikos']
 
 	def doWithSpring = {
 

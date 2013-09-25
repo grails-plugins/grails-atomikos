@@ -1,7 +1,19 @@
-The first thing you need to do is install the plugin:
+The first thing you need to do is install the plugin by adding a dependency in BuildConfig.groovy:
 
 {code}
-$ grails install-plugin atomikos
+plugins {
+   compile ':atomikos:1.0'
+   ...
+}
+{code}
+
+Note that for Grails 2.3+ you need to add a dependency for spring-jms. This depends on the version of Spring that your Grails version uses, so look in the $GRAILS_HOME/lib/org.springframework/spring-jms/jars directory to see what version to use. You'll need something like this in the dependencies section of BuildConfig.groovy:
+
+{code}
+dependencies {
+   compile 'org.springframework:spring-jms:3.2.4.RELEASE'
+   ...
+}
 {code}
 
 h4. Configuration

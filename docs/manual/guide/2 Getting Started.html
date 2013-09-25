@@ -87,7 +87,13 @@ function addJsClass() {
                 
 
 <h1 id="2 Getting Started">2 Getting Started</h1>
-The first thing you need to do is install the plugin:<p class="paragraph"/><div class="code"><pre>$ grails install&#45;plugin atomikos</pre></div><p class="paragraph"/><h4>Configuration</h4><p class="paragraph"/>Ordinarily Atomikos is configured with a properties file named jta.properties but the plugin makes this simpler by letting you specify properties in <code>Config.groovy</code>. The configuration key is <code>grails.plugin.atomikos.uts</code> and the default values set by the plugin are<p class="paragraph"/><div class="code"><pre>'com.atomikos.icatch.console_file_name': 'tm.out',
+The first thing you need to do is install the plugin by adding a dependency in BuildConfig.groovy:<p class="paragraph"/><div class="code"><pre>plugins &#123;
+   compile ':atomikos:1.0'
+   &#8230;
+&#125;</pre></div><p class="paragraph"/>Note that for Grails 2.3+ you need to add a dependency for spring-jms. This depends on the version of Spring that your Grails version uses, so look in the $GRAILS_HOME/lib/org.springframework/spring-jms/jars directory to see what version to use. You'll need something like this in the dependencies section of BuildConfig.groovy:<p class="paragraph"/><div class="code"><pre>dependencies &#123;
+   compile 'org.springframework:spring&#45;jms:3.2.4.RELEASE'
+   &#8230;
+&#125;</pre></div><p class="paragraph"/><h4>Configuration</h4><p class="paragraph"/>Ordinarily Atomikos is configured with a properties file named jta.properties but the plugin makes this simpler by letting you specify properties in <code>Config.groovy</code>. The configuration key is <code>grails.plugin.atomikos.uts</code> and the default values set by the plugin are<p class="paragraph"/><div class="code"><pre>'com.atomikos.icatch.console_file_name': 'tm.out',
 'com.atomikos.icatch.log_base_name': 'tmlog',
 'com.atomikos.icatch.tm_unique_name': 'atomikosTransactionManager',
 'com.atomikos.icatch.console_log_level': 'INFO',

@@ -31,8 +31,8 @@ class AtomikosGrailsPlugin {
 
 	private Logger log = LoggerFactory.getLogger('grails.plugin.atomikos.AtomikosGrailsPlugin')
 
-	String version = '1.0'
-	String grailsVersion = '2.0 > *'	
+	String version = '1.1'
+	String grailsVersion = '2.3.0 > *'
 	String author = 'Burt Beckwith'
 	String authorEmail = 'beckwithb@vmware.com'
 	String title = 'Atomikos JTA/XA Plugin'
